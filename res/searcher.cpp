@@ -9,11 +9,7 @@
 # define WORDS_INITIALIZER {}
 #endif
 
-constexpr std::array<const char*, 2> a = {
-    "1", "2"
-};
-
-std::vector<const char*> words = WORDS_INITIALIZER;
+constexpr std::array<const char*, WORDS_COUNT> words = WORDS_INITIALIZER;
 
 int main(int argc, char* argv[])
 {

@@ -35,6 +35,7 @@ void replace(std::string& str, const std::string& before, const std::string& aft
 void write_def_array(const std::string& filename, const std::vector<std::string>& words)
 {
     std::ofstream out(filename);
+    out << "#define WORDS_COUNT " << words.size() << "\n";
     out << "#define WORDS_INITIALIZER { \\\n";
     for (auto& word : words) {
         auto outword = word;

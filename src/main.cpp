@@ -60,6 +60,7 @@ int main()
     }
 
     auto words = load_words(db);
+    std::cout << words.size() << " words loaded\n";
     write_def_array("words.h", words);
 
     rc = sqlite3_close(db);

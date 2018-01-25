@@ -7,8 +7,7 @@ class TrieNode
 {
 public:
     TrieNode(char letter)
-        : id{idCount++}
-        , isLeaf{false}
+        : isLeaf{false}
         , letter{letter}
     {
     }
@@ -42,26 +41,42 @@ public:
         }
     }
 
-    std::vector<TrieNode*> getNodes() const
+    std::vector<TrieNode*> getNodes(int& id) const
     {
-        auto nodes = std::vector<TrieNode*>(children.begin(), children.end());
-        for (auto node : children) {
-            auto childNodes = node->getNodes();
+        this->id = id++;
+        auto nodes = std::vector<TrieNode*>{};
+        TrieNode* prev = nullptr;
+
+        for (auto it = children.begin(); it != children.end(); ++it) {
+            auto node = *it;
+            auto childNodes = node->getNodes(id);
+            if (prev != nullptr) {
+                prev->nextId = node->id;
+            }
+
+            nodes.push_back(node);
             nodes.insert(nodes.end(), childNodes.begin(), childNodes.end());
+            prev = node;
         }
+
+        if (prev != nullptr) {
+            prev->nextId = 0;
+        }
+
+        auto bottom = children.front();
+        this->bottomId = bottom != nullptr ? bottom->id : 0;
 
         return nodes;
     }
 
 public:
-    static int idCount;
-    int id;
+    mutable int id;
+    mutable int nextId;
+    mutable int bottomId;
     bool isLeaf;
     char letter;
     std::list<TrieNode*> children;
 };
-
-int TrieNode::idCount = 0;
 
 class TrieTree
 {
@@ -83,7 +98,8 @@ public:
 
     std::vector<TrieNode*> getNodes() const
     {
-        return root->getNodes();
+        int startId = 0;
+        return root->getNodes(startId);
     }
 
 private:
@@ -97,7 +113,11 @@ int main()
     t.insert("abq");
     t.insert("asd");
     for (auto node : t.getNodes()) {
-        std::cout << node->letter << " " << node->isLeaf << std::endl;
+        std::cout 
+            << node->letter << " " 
+            << "id="   << node->id << " " 
+            << "next=" << node->nextId << " " 
+            << "bott=" << node->bottomId << std::endl;
     }
 
     return 0;

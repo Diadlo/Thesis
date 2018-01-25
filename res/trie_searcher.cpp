@@ -24,7 +24,7 @@ int next_line(int id, const array_t& t, const char* str)
         }
     }
 
-    return 0;
+    return t[id].bottomId;
 }
 
 int main(int argc, char* argv[])
@@ -35,13 +35,15 @@ int main(int argc, char* argv[])
     }
 
     auto str = argv[1];
+    auto lastIsLeaf = false;
     int id = trieTree[0].bottomId;
-    while (*str != '\0' && !trieTree[id].isLeaf) {
+    while (*str != '\0' && id != 0) {
+        lastIsLeaf = trieTree[id].isLeaf;
         id = next_line(id, trieTree, str);
         str++;
     }
 
-    auto found = *str == '\0' && trieTree[id].isLeaf;
+    auto found = *str == '\0' && lastIsLeaf;
     if (found) {
         std::cout << "found\n";
     } else {

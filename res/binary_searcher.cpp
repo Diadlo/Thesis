@@ -3,7 +3,11 @@
 #include <algorithm>
 #include <cstring>
 #include <array>
-#include "words.h"
+#include "words_array.h"
+
+#ifndef WORDS_COUNT
+# define WORDS_COUNT 0
+#endif
 
 #ifndef WORDS_INITIALIZER
 # define WORDS_INITIALIZER {}

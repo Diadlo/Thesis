@@ -62,7 +62,9 @@ void write_trie_array(const std::string& filename, const std::vector<std::string
         << "struct TrieNode { \n"
         << "    char letter;\n"
         << "    bool isLeaf;\n"
-        << "    int id, nextId, bottomId;\n"
+//        << "    int id;\n"
+        << "    int nextId;\n"
+        << "    int bottomId;\n"
         << "};\n"
         << "#define TRIE_NODES_COUNT " << nodes.size() << "\n"
         << "#define TRIE_TREE_INITIALIZER { \\\n";
@@ -80,10 +82,10 @@ void write_trie_array(const std::string& filename, const std::vector<std::string
             }
         }();
 
-        out << "{"
+        out << "TrieNode{"
             << "'" << sLetter << "', "
             << (node->isLeaf ? "true" : "false") << ", "
-            << node->id << ", "
+//            << node->id << ", "
             << node->nextId << ", "
             << node->bottomId 
             << "},\\\n";

@@ -13,7 +13,7 @@
 # define TRIE_TREE_INITIALIZER {}
 #endif
 
-using array_t = std::array<const char*, TRIE_NODES_COUNT>;
+using array_t = std::array<TrieNode, TRIE_NODES_COUNT>;
 constexpr array_t trieTree = TRIE_TREE_INITIALIZER;
 
 int next_line(int id, const array_t& t, const char* str)

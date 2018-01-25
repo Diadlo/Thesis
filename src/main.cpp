@@ -2,6 +2,7 @@
 #include <iostream>
 #include <fstream>
 #include <vector>
+#include "trietree.h"
 
 std::vector<std::string> load_words(sqlite3* db)
 {
@@ -35,6 +36,7 @@ void replace(std::string& str, const std::string& before, const std::string& aft
 void write_def_array(const std::string& filename, const std::vector<std::string>& words)
 {
     std::ofstream out(filename);
+    out << "#pragma once\n";
     out << "#define WORDS_COUNT " << words.size() << "\n";
     out << "#define WORDS_INITIALIZER { \\\n";
     for (auto& word : words) {
@@ -44,6 +46,48 @@ void write_def_array(const std::string& filename, const std::vector<std::string>
         out << "\"" << outword << "\", \\\n";
     }
 
+    out << "}\n";
+}
+
+void write_trie_array(const std::string& filename, const std::vector<std::string>& words)
+{
+    std::ofstream out(filename);
+    TrieTree t;
+    for (const auto& word : words) {
+        t.insert(word);
+    }
+
+    auto nodes = t.getNodes();
+    out << "#pragma once\n"
+        << "struct TrieNode { \n"
+        << "    char letter;\n"
+        << "    bool isLeaf;\n"
+        << "    int id, nextId, bottomId;\n"
+        << "};\n"
+        << "#define TRIE_NODES_COUNT " << nodes.size() << "\n"
+        << "#define TRIE_TREE_INITIALIZER { \\\n";
+    for (auto node : nodes) {
+        const auto letter = node->letter;
+        const auto sLetter = [letter]() {
+            switch (letter)
+            {
+                case '\0':
+                    return std::string("\\0");
+                case '\'':
+                    return std::string("\\'");
+                default:
+                    return std::string(1, letter);
+            }
+        }();
+
+        out << "{"
+            << "'" << sLetter << "', "
+            << (node->isLeaf ? "true" : "false") << ", "
+            << node->id << ", "
+            << node->nextId << ", "
+            << node->bottomId 
+            << "},\\\n";
+    }
     out << "}\n";
 }
 
@@ -61,7 +105,8 @@ int main()
 
     auto words = load_words(db);
     std::cout << words.size() << " words loaded\n";
-    write_def_array("words.h", words);
+    write_def_array("words_array.h", words);
+    write_trie_array("words_trie_tree.h", words);
 
     rc = sqlite3_close(db);
     if (rc != SQLITE_OK) {

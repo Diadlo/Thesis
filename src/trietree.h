@@ -10,6 +10,7 @@ public:
         : isLeaf{false}
         , letter{letter}
     {
+        globalCount++;
     }
 
     ~TrieNode()
@@ -41,21 +42,19 @@ public:
         }
     }
 
-    std::vector<TrieNode*> getNodes(int& id) const
+    void getNodes(std::vector<TrieNode*>& nodes, int& id) const
     {
         this->id = id++;
-        auto nodes = std::vector<TrieNode*>{};
         TrieNode* prev = nullptr;
 
         for (auto it = children.begin(); it != children.end(); ++it) {
             auto node = *it;
-            auto childNodes = node->getNodes(id);
+            nodes.push_back(node);
+            node->getNodes(nodes, id);
             if (prev != nullptr) {
                 prev->nextId = node->id;
             }
 
-            nodes.push_back(node);
-            nodes.insert(nodes.end(), childNodes.begin(), childNodes.end());
             prev = node;
         }
 
@@ -65,11 +64,10 @@ public:
 
         auto bottom = children.front();
         this->bottomId = bottom != nullptr ? bottom->id : 0;
-
-        return nodes;
     }
 
 public:
+    static int globalCount;
     mutable int id;
     mutable int nextId;
     mutable int bottomId;
@@ -77,6 +75,8 @@ public:
     char letter;
     std::list<TrieNode*> children;
 };
+
+int TrieNode::globalCount = 0;
 
 class TrieTree
 {
@@ -99,26 +99,13 @@ public:
     std::vector<TrieNode*> getNodes() const
     {
         int startId = 0;
-        return root->getNodes(startId);
+        auto nodes = std::vector<TrieNode*>{};
+        nodes.reserve(TrieNode::globalCount);
+        nodes.push_back(root);
+        root->getNodes(nodes, startId);
+        return nodes;
     }
 
 private:
     TrieNode* root;
 };
-
-int main()
-{
-    TrieTree t;
-    t.insert("abc");
-    t.insert("abq");
-    t.insert("asd");
-    for (auto node : t.getNodes()) {
-        std::cout 
-            << node->letter << " " 
-            << "id="   << node->id << " " 
-            << "next=" << node->nextId << " " 
-            << "bott=" << node->bottomId << std::endl;
-    }
-
-    return 0;
-}

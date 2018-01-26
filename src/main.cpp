@@ -93,10 +93,17 @@ void write_trie_array(const std::string& filename, const std::vector<std::string
     out << "}\n";
 }
 
-int main()
+int main(int argc, char* argv[])
 {
+    if (argc != 4) {
+        std::cout << "Usage: " << argv[0] << " <db> <array output> "
+            "<trie tree output>\n";
+        return -1;
+    }
+
+    const auto dbFilename = argv[1];
     sqlite3* db;
-    auto rc = sqlite3_open_v2("words.db", &db,
+    auto rc = sqlite3_open_v2(dbFilename, &db,
             SQLITE_OPEN_READWRITE | 
             SQLITE_OPEN_CREATE | 
             SQLITE_OPEN_NOMUTEX, nullptr);
@@ -105,10 +112,14 @@ int main()
         return -1;
     }
 
-    auto words = load_words(db);
+    const auto words = load_words(db);
     std::cout << words.size() << " words loaded\n";
-    write_def_array("words_array.h", words);
-    write_trie_array("words_trie_tree.h", words);
+
+    const auto arrayFilename = argv[2];
+    write_def_array(arrayFilename, words);
+
+    const auto trieTreeFilename = argv[3];
+    write_trie_array(trieTreeFilename, words);
 
     rc = sqlite3_close(db);
     if (rc != SQLITE_OK) {

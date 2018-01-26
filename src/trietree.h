@@ -1,3 +1,6 @@
+#ifndef _TRIE_TREE_H_
+#define _TRIE_TREE_H_
+
 #include <list>
 #include <iostream>
 #include <vector>
@@ -109,3 +112,5 @@ public:
 private:
     TrieNode* root;
 };
+
+#endif // _TRIE_TREE_H_

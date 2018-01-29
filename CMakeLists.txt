@@ -13,12 +13,21 @@ target_link_libraries(${PROJECT_NAME} sqlite3)
 add_executable(filler src/filler.cpp)
 target_link_libraries(filler sqlite3)
 
+add_custom_target(fill_db
+        COMMAND
+            cmake -E echo "Fill database" &&
+            ./filler ${CMAKE_SOURCE_DIR}/words.txt ${CMAKE_BINARY_DIR}/words.db
+        WORKING_DIRECTORY
+            ${CMAKE_BINARY_DIR})
+
 add_custom_target(generate
         COMMAND
             cmake -E echo "Generating headers" &&
             ./${PROJECT_NAME} words.db words_array.h words_trie_tree.h
         WORKING_DIRECTORY
             ${CMAKE_BINARY_DIR})
+
+add_dependencies(generate fill_db)
 
 # Tests
 function (add_test name)

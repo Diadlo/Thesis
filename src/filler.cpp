@@ -4,6 +4,27 @@
 #include <vector>
 #include <sstream>
 
+void create_database(sqlite3* db)
+{
+    const auto query = "CREATE TABLE IF NOT EXISTS words("
+        "id int PRIMARY KEY, "
+        "word word UNIQUE);";
+
+    sqlite3_stmt* stmt;
+    auto rc = sqlite3_prepare_v2(db, query.c_str(), -1, &stmt, 0);
+    if (rc != SQLITE_OK) {
+        std::cerr << "Can't prepare CREATE (" << sqlite3_errmsg(db) << ")\n";
+        return;
+    }
+
+    rc = sqlite3_step(stmt);
+    if (rc != SQLITE_DONE) {
+        std::cerr << "Can't execute CREATE (" << sqlite3_errmsg(db) << ")\n";
+    }
+
+    sqlite3_finalize(stmt);
+}
+
 std::vector<std::string> load_words(const std::string& file)
 {
     std::ifstream in(file);
@@ -20,7 +41,7 @@ void insert_words(sqlite3* db, std::vector<std::string>::const_iterator begin,
         std::vector<std::string>::const_iterator end)
 {
     auto ss = std::stringstream{};
-    ss << "INSERT INTO words(word) VALUES ";
+    ss << "INSERT OR IGNORE INTO words(word) VALUES ";
     for (auto it = begin; it != end; ++it) {
         ss << "(?),";
     }
@@ -31,7 +52,7 @@ void insert_words(sqlite3* db, std::vector<std::string>::const_iterator begin,
     sqlite3_stmt* stmt;
     auto rc = sqlite3_prepare_v2(db, query.c_str(), -1, &stmt, 0);
     if (rc != SQLITE_OK) {
-        std::cerr << "Can't prepare (" << sqlite3_errmsg(db) << ")\n";
+        std::cerr << "Can't prepare INSERT (" << sqlite3_errmsg(db) << ")\n";
         return;
     }
 
@@ -44,7 +65,7 @@ void insert_words(sqlite3* db, std::vector<std::string>::const_iterator begin,
 
     rc = sqlite3_step(stmt);
     if (rc != SQLITE_DONE) {
-        std::cerr << "Can't execute (" << sqlite3_errmsg(db) << ")\n";
+        std::cerr << "Can't execute INSERT (" << sqlite3_errmsg(db) << ")\n";
     }
 
     sqlite3_finalize(stmt);
@@ -64,6 +85,7 @@ int main()
         return -1;
     }
 
+    create_database(db);
     const auto words = load_words("words.txt");
     const auto size = words.size();
     std::cout << size << " words loaded\n";

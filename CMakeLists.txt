@@ -16,7 +16,7 @@ target_link_libraries(filler sqlite3)
 add_custom_target(fill_db
         COMMAND
             cmake -E echo "Fill database" &&
-            ./filler ${CMAKE_SOURCE_DIR}/words.txt ${CMAKE_BINARY_DIR}/words.db
+            ./filler 1500000 ${CMAKE_BINARY_DIR}/words.db
         WORKING_DIRECTORY
             ${CMAKE_BINARY_DIR}
         DEPENDS

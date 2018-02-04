@@ -13,10 +13,13 @@ target_link_libraries(${PROJECT_NAME} sqlite3)
 add_executable(filler src/filler.cpp)
 target_link_libraries(filler sqlite3)
 
+option(DB_FILE "Path to generated database" ${CMAKE_BINARY_DIR}/words.db)
+option(WORD_COUNT "Count words to generate" 10000)
+
 add_custom_target(fill_db
         COMMAND
             cmake -E echo "Fill database" &&
-            ./filler 1500000 ${CMAKE_BINARY_DIR}/words.db
+            ./filler ${WORD_COUNT} ${DB_FILE}
         WORKING_DIRECTORY
             ${CMAKE_BINARY_DIR}
         DEPENDS
@@ -25,7 +28,7 @@ add_custom_target(fill_db
 add_custom_target(generate
         COMMAND
             cmake -E echo "Generating headers" &&
-            ./${PROJECT_NAME} words.db words_array.h words_trie_tree.h
+            ./${PROJECT_NAME} ${DB_FILE} words_array.h words_trie_tree.h
         WORKING_DIRECTORY
             ${CMAKE_BINARY_DIR}
         DEPENDS

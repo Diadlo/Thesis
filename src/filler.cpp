@@ -6,7 +6,7 @@
 #include <cstdlib>
 #include <ctime>
 
-void create_database(sqlite3* db)
+void create_table(sqlite3* db)
 {
     const auto query = "CREATE TABLE IF NOT EXISTS words("
         "id INT PRIMARY KEY, "
@@ -188,7 +188,7 @@ int main(int argc, const char* argv[])
         return -1;
     }
 
-    create_database(db);
+    create_table(db);
     std::srand(unsigned(std::time(0)));
     //const auto words = load_words(words_txt);
     //const auto size = words.size();

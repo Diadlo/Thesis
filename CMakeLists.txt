@@ -13,8 +13,8 @@ target_link_libraries(${PROJECT_NAME} sqlite3)
 add_executable(filler src/filler.cpp)
 target_link_libraries(filler sqlite3)
 
-option(DB_FILE "Path to generated database" ${CMAKE_BINARY_DIR}/words.db)
-option(WORD_COUNT "Count words to generate" 10000)
+set(DB_FILE "${CMAKE_BINARY_DIR}/words.db" CACHE STRING "Path to generated database")
+set(WORD_COUNT 10000 CACHE STRING "Count words to generate")
 
 add_custom_target(fill_db
         COMMAND

@@ -1,11 +1,13 @@
+#include <algorithm>
+#include <array>
+#include <chrono>
+#include <cstring>
 #include <iostream>
 #include <vector>
-#include <algorithm>
-#include <cstring>
-#include <array>
+
 #include "words_trie_tree.h"
 
-#ifndef TRIE_NODES_COUNT 
+#ifndef TRIE_NODES_COUNT
 # define TRIE_NODES_COUNT 0
 #endif
 
@@ -13,18 +15,32 @@
 # define TRIE_TREE_INITIALIZER {}
 #endif
 
-using array_t = std::array<TrieNode, TRIE_NODES_COUNT>;
-constexpr array_t trieTree = TRIE_TREE_INITIALIZER;
+constexpr std::array<TrieNode, TRIE_NODES_COUNT> trieTree = TRIE_TREE_INITIALIZER;
 
-int next_line(int id, const array_t& t, const char* str)
+template<class Array>
+int next_line(int id, const Array& array, const char* word)
 {
-    for (; t[id].nextId != 0; id = t[id].nextId) {
-        if (t[id].letter == *str) {
-            return t[id].bottomId;
+    for (; array[id].nextId != 0; id = array[id].nextId) {
+        if (array[id].letter == *word) {
+            return array[id].bottomId;
         }
     }
 
-    return t[id].bottomId;
+    return array[id].bottomId;
+}
+
+template<class Array>
+bool find_trie(const Array& array, const char* word)
+{
+    auto lastIsLeaf = false;
+    auto id = array[0].bottomId;
+    while (*word != '\0' && id != 0) {
+        lastIsLeaf = array[id].isLeaf;
+        id = next_line(id, array, word);
+        word++;
+    }
+
+    return *word == '\0' && lastIsLeaf;
 }
 
 int main(int argc, char* argv[])
@@ -34,16 +50,13 @@ int main(int argc, char* argv[])
         return -1;
     }
 
-    auto str = argv[1];
-    auto lastIsLeaf = false;
-    int id = trieTree[0].bottomId;
-    while (*str != '\0' && id != 0) {
-        lastIsLeaf = trieTree[id].isLeaf;
-        id = next_line(id, trieTree, str);
-        str++;
-    }
+    const auto start = std::chrono::high_resolution_clock::now();
+    const auto found = find_trie(trieTree, argv[1]);
+    const auto finish = std::chrono::high_resolution_clock::now();
 
-    auto found = *str == '\0' && lastIsLeaf;
+    const auto duration = finish - start;
+    std::cout << duration.count() << "s\n";
+
     if (found) {
         std::cout << "found\n";
     } else {

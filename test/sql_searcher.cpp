@@ -1,6 +1,7 @@
-#include <sqlite3.h>
-#include <iostream>
+#include <chrono>
 #include <fstream>
+#include <iostream>
+#include <sqlite3.h>
 #include <vector>
 
 bool find_word(sqlite3* db, const std::string& word)
@@ -29,20 +30,25 @@ int main(int argc, const char* argv[])
 
     sqlite3* db;
     auto rc = sqlite3_open_v2("words.db", &db,
-            SQLITE_OPEN_READWRITE | 
-            SQLITE_OPEN_CREATE | 
+            SQLITE_OPEN_READWRITE |
+            SQLITE_OPEN_CREATE |
             SQLITE_OPEN_NOMUTEX, nullptr);
     if (rc != SQLITE_OK) {
         std::cerr << "Error opening database: " << sqlite3_errmsg(db);
         return -1;
     }
 
-    auto word = std::string(argv[1]);
-    auto found = find_word(db, word);
+    const auto word = std::string(argv[1]);
+    const auto start = std::chrono::high_resolution_clock::now();
+    const auto found = find_word(db, word);
+    const auto finish = std::chrono::high_resolution_clock::now();
+
+    const auto duration = finish - start;
+    std::cout << duration.count() << "s\n";
     if (found) {
-        std::cout << "Found\n";
+        std::cout << "found\n";
     } else {
-        std::cout << "Not found\n";
+        std::cout << "not found\n";
     }
 
     rc = sqlite3_close(db);

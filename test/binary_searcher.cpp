@@ -1,8 +1,10 @@
+#include <algorithm>
+#include <array>
+#include <chrono>
+#include <cstring>
 #include <iostream>
 #include <vector>
-#include <algorithm>
-#include <cstring>
-#include <array>
+
 #include "words_array.h"
 
 #ifndef WORDS_COUNT
@@ -15,6 +17,15 @@
 
 constexpr std::array<const char*, WORDS_COUNT> words = WORDS_INITIALIZER;
 
+template<class Array>
+bool find_binary(const Array& array, const char* word)
+{
+    return std::binary_search(words.begin(), words.end(), word,
+            [](const char* s1, const char* s2) {
+                return std::strcmp(s1, s2) < 0;
+            });
+}
+
 int main(int argc, char* argv[])
 {
     if (argc != 2) {
@@ -22,10 +33,12 @@ int main(int argc, char* argv[])
         return -1;
     }
 
-    auto found = std::binary_search(words.begin(), words.end(), argv[1], 
-            [](const char* s1, const char* s2) {
-                return std::strcmp(s1, s2) < 0;
-            });
+    const auto start = std::chrono::high_resolution_clock::now();
+    const auto found = find_binary(words, argv[1]);
+    const auto finish = std::chrono::high_resolution_clock::now();
+
+    const auto duration = finish - start;
+    std::cout << duration.count() << " ticks\n";
 
     if (found) {
         std::cout << "found\n";

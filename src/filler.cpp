@@ -6,6 +6,10 @@
 #include <cstdlib>
 #include <ctime>
 
+constexpr auto WORDS_PER_INSERT = 2000;
+constexpr auto MAX_LEN = 5;
+constexpr auto LET_COUNT = 'z' - 'a';
+
 void create_table(sqlite3* db)
 {
     const auto query = "CREATE TABLE IF NOT EXISTS words("
@@ -73,10 +77,6 @@ void insert_words(sqlite3* db, It begin, It end)
     sqlite3_finalize(stmt);
 }
 
-constexpr auto WORDS_PER_INSERT = 2000;
-constexpr auto MAX_LEN = 5;
-constexpr auto LET_COUNT = 'z' - 'a';
-
 class WordsGenerator
 {
 public:
@@ -84,23 +84,24 @@ public:
     {
     public:
         Iterator(int count, int words_per_count, int word_size, char* buf)
-            : count{count}
-            , words_per_count{words_per_count}
-            , word_size{word_size}
-            , buf{buf}
+            : m_count{count}
+            , m_words_per_count{words_per_count}
+            , m_word_size{word_size}
+            , m_buf{buf}
         {
+            std::srand(unsigned(std::time(0)));
         }
 
         Iterator& operator++()
         {
-            count++;
+            m_count++;
             return *this;
         }
 
         Iterator operator+(int value)
         {
             auto it = *this;
-            it.count += value;
+            it.m_count += value;
             return it;
         }
 
@@ -111,62 +112,66 @@ public:
 
         bool operator!=(const Iterator& other)
         {
-            return count != other.count;
+            return m_count != other.m_count;
         }
 
         const char* c_str() const
         {
-            return buf + (count % words_per_count) * word_size;
+            return m_buf + (m_count % m_words_per_count) * m_word_size;
         }
 
     public:
-        int count;
-        int words_per_count;
-        int word_size;
-        mutable char* buf;
+        int m_count;
+        int m_words_per_count;
+        int m_word_size;
+        mutable char* m_buf;
     };
 
     WordsGenerator(int max_count, int max_length, int words_per_count)
-        : max_count{max_count}
-        , size{max_length + 1}
-        , words_per_count{words_per_count}
-        , buf{new char[words_per_count * size]}
+        : m_max_count{max_count}
+        , m_size{max_length + 1}
+        , m_words_per_count{words_per_count}
+        , m_buf{new char[m_words_per_count * m_size]}
     {
         generate();
     }
 
     ~WordsGenerator()
     {
-        delete buf;
+        delete m_buf;
     }
 
     Iterator begin() const
     {
-        return Iterator(0, words_per_count, size, buf);
+        return Iterator(0, m_words_per_count, m_size, m_buf);
     }
 
     Iterator end() const
     {
-        return Iterator(max_count, words_per_count, size, nullptr);
+        return Iterator(m_max_count, m_words_per_count, m_size, nullptr);
     }
 
     void generate()
     {
-        for (auto i = 0; i < words_per_count * size; i++) {
-            if ((i + 1) % size == 0) {
-                buf[i] = 0;
+        for (auto i = 0; i < m_words_per_count * m_size; i++) {
+            if ((i + 1) % m_size == 0) {
+                m_buf[i] = 0;
             } else {
-                buf[i] = (std::rand() % LET_COUNT) + 'a';
+                m_buf[i] = (std::rand() % LET_COUNT) + 'a';
             }
         }
     }
 
+    int size() const
+    {
+        return m_max_count;
+    }
 
 private:
-    int max_count;
-    int size;
-    int words_per_count;
-    char* buf;
+    int m_max_count;
+    int m_size;
+    int m_words_per_count;
+    char* m_buf;
 };
 
 int main(int argc, const char* argv[])
@@ -180,20 +185,21 @@ int main(int argc, const char* argv[])
     auto count = atoi(argv[1]);
     auto words_db = argv[2];
     auto rc = sqlite3_open_v2(words_db, &db,
-            SQLITE_OPEN_READWRITE | 
-            SQLITE_OPEN_CREATE | 
+            SQLITE_OPEN_READWRITE |
+            SQLITE_OPEN_CREATE |
             SQLITE_OPEN_NOMUTEX, nullptr);
     if (rc != SQLITE_OK) {
         std::cerr << "Error opening database: " << sqlite3_errmsg(db);
         return -1;
     }
 
+    std::cout << "Count = " << count << "\n";
+    std::cout << "DB = " << words_db << "\n";
     create_table(db);
-    std::srand(unsigned(std::time(0)));
-    //const auto words = load_words(words_txt);
-    //const auto size = words.size();
-    //std::cout << size << " words loaded\n";
+    //const auto words = load_words("words.txt");
     auto words = WordsGenerator(count, MAX_LEN, WORDS_PER_INSERT);
+
+    std::cout << words.size() << " words loaded\n";
     auto it = words.begin();
     for (int i = 0; i < count / WORDS_PER_INSERT; i++) {
         std::cout << i << "/" << count / WORDS_PER_INSERT << std::endl;

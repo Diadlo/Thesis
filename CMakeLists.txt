@@ -16,7 +16,9 @@ target_link_libraries(filler sqlite3)
 set(DB_FILE "${CMAKE_BINARY_DIR}/words.db" CACHE STRING "Path to generated database")
 set(WORD_COUNT 10000 CACHE STRING "Count words to generate")
 
-add_custom_target(fill_db
+add_custom_command(
+        OUTPUT
+            ${DB_FILE}
         COMMAND
             cmake -E echo "Fill database" &&
             ./filler ${WORD_COUNT} ${DB_FILE}
@@ -25,24 +27,27 @@ add_custom_target(fill_db
         DEPENDS
             filler)
 
-add_custom_target(generate
+add_custom_command(
+        OUTPUT
+            words_array.h words_trie_tree.h
         COMMAND
             cmake -E echo "Generating headers" &&
             ./${PROJECT_NAME} ${DB_FILE} words_array.h words_trie_tree.h
+        DEPENDS
+            ${DB_FILE}
         WORKING_DIRECTORY
             ${CMAKE_BINARY_DIR}
         DEPENDS
-            ${PROJECT_NAME}
-            fill_db)
+            ${PROJECT_NAME})
 
 # Tests
 function (add_test name)
-    add_executable(${name} test/${name}.cpp)
+    set(sources ${ARGN})
+    add_executable(${name} ${sources} test/${name}.cpp)
     target_link_libraries(${name} sqlite3)
-    add_dependencies(${name} generate)
     target_include_directories(${name} PUBLIC ${CMAKE_BINARY_DIR})
 endfunction()
 
-add_test(sql_searcher)
-add_test(binary_searcher)
-add_test(trie_searcher)
+add_test(sql_searcher words_array.h words_trie_tree.h)
+add_test(binary_searcher words_array.h)
+add_test(trie_searcher   words_trie_tree.h)

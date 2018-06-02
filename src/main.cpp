@@ -1,8 +1,8 @@
-#include <sqlite3.h>
 #include <iostream>
 #include <fstream>
 #include <vector>
 #include "trietree.h"
+#include "sqlite_db.h"
 
 std::vector<std::string> load_words(sqlite3* db)
 {
@@ -87,7 +87,7 @@ void write_trie_array(const std::string& filename, const std::vector<std::string
             << (node->isLeaf ? "true" : "false") << ", "
 //            << node->id << ", "
             << node->nextId << ", "
-            << node->bottomId 
+            << node->bottomId
             << "},\\\n";
     }
     out << "}\n";
@@ -102,17 +102,18 @@ int main(int argc, char* argv[])
     }
 
     const auto dbFilename = argv[1];
-    sqlite3* db;
-    auto rc = sqlite3_open_v2(dbFilename, &db,
-            SQLITE_OPEN_READWRITE | 
-            SQLITE_OPEN_CREATE | 
-            SQLITE_OPEN_NOMUTEX, nullptr);
-    if (rc != SQLITE_OK) {
-        std::cerr << "Error opening database: " << sqlite3_errmsg(db);
+    sqlite_db db(dbFilename);
+    if (!db) {
+        std::cerr << "Error opening database: " << db.error();
         return -1;
     }
 
-    const auto words = load_words(db);
+    const auto words = db.select_sorted_column("words", table_column::data_type::TEXT, "word");
+    if (words.empty()) {
+        std::cerr << "Can't load words: " << db.error();
+        return -1;
+    }
+
     std::cout << words.size() << " words loaded\n";
 
     const auto arrayFilename = argv[2];
@@ -120,12 +121,6 @@ int main(int argc, char* argv[])
 
     const auto trieTreeFilename = argv[3];
     write_trie_array(trieTreeFilename, words);
-
-    rc = sqlite3_close(db);
-    if (rc != SQLITE_OK) {
-        std::cerr << "Error closing database: " << sqlite3_errmsg(db);
-        return -1;
-    }
 
     return 0;
 }

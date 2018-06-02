@@ -44,7 +44,7 @@ int main(int argc, const char* argv[])
     const auto finish = std::chrono::high_resolution_clock::now();
 
     const auto duration = finish - start;
-    std::cout << duration.count() << "s\n";
+    std::cout << duration.count() << " ticks\n";
     if (found) {
         std::cout << "found\n";
     } else {

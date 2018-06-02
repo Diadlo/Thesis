@@ -4,14 +4,18 @@ cmake_minimum_required(VERSION 3.10)
 set(PROJECT_NAME thesis)
 set(CMAKE_CXX_STANDARD 14)
 
+add_library(sqlite_db STATIC include/sqlite_db.h src/sqlite_db.cpp)
+target_include_directories(sqlite_db PUBLIC include)
+target_link_libraries(sqlite_db sqlite3)
+
 add_executable(${PROJECT_NAME}
         src/main.cpp
         src/trietree.h)
 
-target_link_libraries(${PROJECT_NAME} sqlite3)
+target_link_libraries(${PROJECT_NAME} sqlite_db)
 
 add_executable(filler src/filler.cpp)
-target_link_libraries(filler sqlite3)
+target_link_libraries(filler sqlite_db)
 
 set(DB_FILE "${CMAKE_BINARY_DIR}/words.db" CACHE STRING "Path to generated database")
 set(WORD_COUNT 10000 CACHE STRING "Count words to generate")

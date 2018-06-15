@@ -22,32 +22,32 @@ std::vector<std::string> load_words(const std::string& file)
     return words;
 }
 
-class WordsGenerator
+class words_generator
 {
 public:
-    class Iterator
+    class iterator
     {
     public:
-        Iterator(int count, int word_size)
+        iterator(int count, int word_size)
             : m_count{count}
             , m_word_size{word_size}
         {
         }
 
-        Iterator& operator++()
+        iterator& operator++()
         {
             m_count++;
             return *this;
         }
 
-        Iterator operator+(int value)
+        iterator operator+(int value)
         {
             auto it = *this;
             it.m_count += value;
             return it;
         }
 
-        int operator-(const Iterator& it)
+        int operator-(const iterator& it)
         {
             return m_count - it.m_count;
         }
@@ -65,7 +65,7 @@ public:
             return str;
         }
 
-        bool operator!=(const Iterator& other)
+        bool operator!=(const iterator& other)
         {
             return m_count != other.m_count;
         }
@@ -75,20 +75,20 @@ public:
         int m_word_size;
     };
 
-    WordsGenerator(int max_count, int max_length, int words_per_count)
+    words_generator(int max_count, int max_length, int words_per_count)
         : m_max_count{max_count}
         , m_size{max_length + 1}
     {
     }
 
-    Iterator begin() const
+    iterator begin() const
     {
-        return Iterator(0, m_size);
+        return iterator(0, m_size);
     }
 
-    Iterator end() const
+    iterator end() const
     {
-        return Iterator(m_max_count, m_size);
+        return iterator(m_max_count, m_size);
     }
 
     int size() const
@@ -117,7 +117,7 @@ int fill(int count, const std::string& words_db)
     });
 
     //const auto words = load_words("words.txt");
-    auto words = WordsGenerator(count, MAX_LEN, WORDS_PER_INSERT);
+    auto words = words_generator(count, MAX_LEN, WORDS_PER_INSERT);
 
     std::cout << words.size() << " words loaded\n";
     auto res = db.insert_rows("words", {"word"}, words.begin(), words.end());

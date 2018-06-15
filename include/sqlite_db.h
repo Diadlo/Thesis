@@ -71,6 +71,7 @@ public:
         return true;
     }
 
+private:
     template<class It>
     bool insert_rows_range(const std::string& table_name,
             const std::vector<std::string>& columns, It begin, It end)

@@ -1,7 +1,7 @@
 project(Thesis)
-cmake_minimum_required(VERSION 3.10)
+cmake_minimum_required(VERSION 3.6)
 
-set(CMAKE_CXX_STANDARD 14)
+set(CMAKE_CXX_STANDARD 11)
 
 add_library(sqlite_db STATIC include/sqlite_db.h src/sqlite_db.cpp)
 target_include_directories(sqlite_db PUBLIC include)

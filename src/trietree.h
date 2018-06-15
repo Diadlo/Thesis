@@ -65,8 +65,7 @@ public:
             prev->next_id = 0;
         }
 
-        auto bottom = children.front();
-        this->bottom_id = bottom != nullptr ? bottom->id : 0;
+        this->bottom_id = children.empty() ? 0 : children.front()->id;
     }
 
 public:

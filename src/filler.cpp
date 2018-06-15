@@ -101,7 +101,8 @@ private:
     int m_size;
 };
 
-int fill(int count, const std::string& words_db)
+template<class T>
+int fill(T words, const std::string& words_db)
 {
     auto db = sqlite_db{words_db};
     if (!db) {
@@ -116,9 +117,6 @@ int fill(int count, const std::string& words_db)
         { "word", dt::TEXT, cf::UNIQUE },
     });
 
-    //const auto words = load_words("words.txt");
-    auto words = words_generator(count, MAX_LEN, WORDS_PER_INSERT);
-
     std::cout << words.size() << " words loaded\n";
     auto res = db.insert_rows("words", {"word"}, words.begin(), words.end());
     if (!res) {
@@ -132,12 +130,21 @@ int fill(int count, const std::string& words_db)
 int main(int argc, const char* argv[])
 {
     std::srand(unsigned(std::time(0)));
-    if (argc != 3) {
-        std::cout << "Usage: " << argv[0] << " <count> <db>\n";
+    if (argc != 3 && argc != 4) {
+        std::cout << "Usage: " << argv[0] << " <count> <db> [<wordlist>]\n";
         return -1;
     }
 
     auto count = atoi(argv[1]);
     auto words_db = argv[2];
-    return fill(count, words_db);
+    auto wordlist = argv[3];
+
+
+    if (count > 0) {
+        const auto words = words_generator(count, MAX_LEN, WORDS_PER_INSERT);
+        return fill(words, words_db);
+    } else {
+        const auto words = load_words("words.txt");
+        return fill(words, words_db);
+    }
 }

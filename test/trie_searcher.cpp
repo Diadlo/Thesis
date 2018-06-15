@@ -29,8 +29,8 @@ int next_line(int id, const Array& array, const char* word)
     return array[id].bottomId;
 }
 
-template<class Array>
-bool find_trie(const Array& array, const char* word)
+template<class Nodes>
+bool find_trie(const Nodes& array, const char* word)
 {
     auto lastIsLeaf = false;
     auto id = array[0].bottomId;

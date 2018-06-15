@@ -18,9 +18,9 @@
 constexpr std::array<const char*, WORDS_COUNT> words = WORDS_INITIALIZER;
 
 template<class Array>
-bool find_binary(const Array& array, const char* word)
+bool find_binary(const Array& array, const std::string& word)
 {
-    return std::binary_search(words.begin(), words.end(), word,
+    return std::binary_search(words.begin(), words.end(), word.c_str(),
             [](const char* s1, const char* s2) {
                 return std::strcmp(s1, s2) < 0;
             });

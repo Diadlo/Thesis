@@ -6,6 +6,11 @@
 
 #include "sqlite_db.h"
 
+bool find_sql(sqlite_db& db, const std::string& word)
+{
+    return db.contains("words", "word", word);
+}
+
 int main(int argc, const char* argv[])
 {
     if (argc != 3) {
@@ -22,7 +27,7 @@ int main(int argc, const char* argv[])
 
     const auto word = std::string(argv[2]);
     const auto start = std::chrono::high_resolution_clock::now();
-    const auto found = db.contains("words", "word", word);
+    const auto found = find_sql(db, word);
     const auto finish = std::chrono::high_resolution_clock::now();
 
     const auto duration = finish - start;

@@ -4,28 +4,6 @@
 #include "trietree.h"
 #include "sqlite_db.h"
 
-std::vector<std::string> load_words(sqlite3* db)
-{
-    auto words = std::vector<std::string>{};
-    constexpr auto query = "SELECT word FROM words ORDER BY word;";
-    sqlite3_stmt* res;
-    auto rc = sqlite3_prepare_v2(db, query, -1, &res, 0);
-    if (rc != SQLITE_OK) {
-        return {};
-    }
-
-    rc = sqlite3_step(res);
-    while (rc == SQLITE_ROW) {
-        const auto text = sqlite3_column_text(res, 0);
-        const auto word = std::string{reinterpret_cast<const char*>(text)};
-        words.push_back(word);
-        rc = sqlite3_step(res);
-    }
-
-    sqlite3_finalize(res);
-    return words;
-}
-
 void replace(std::string& str, const std::string& before, const std::string& after) {
     auto start_pos = str.find(before);
     if (start_pos != std::string::npos) {
@@ -93,16 +71,11 @@ void write_trie_array(const std::string& filename, const std::vector<std::string
     out << "}\n";
 }
 
-int main(int argc, char* argv[])
+int generate(const std::string& words_db,
+             const std::string& array_filename,
+             const std::string& tree_filename)
 {
-    if (argc != 4) {
-        std::cout << "Usage: " << argv[0] << " <db> <array output> "
-            "<trie tree output>\n";
-        return -1;
-    }
-
-    const auto dbFilename = argv[1];
-    sqlite_db db(dbFilename);
+    sqlite_db db(words_db);
     if (!db) {
         std::cerr << "Error opening database: " << db.error();
         return -1;
@@ -115,12 +88,21 @@ int main(int argc, char* argv[])
     }
 
     std::cout << words.size() << " words loaded\n";
-
-    const auto arrayFilename = argv[2];
-    write_def_array(arrayFilename, words);
-
-    const auto trieTreeFilename = argv[3];
-    write_trie_array(trieTreeFilename, words);
-
+    write_def_array(array_filename, words);
+    write_trie_array(tree_filename, words);
     return 0;
+}
+
+int main(int argc, char* argv[])
+{
+    if (argc != 4) {
+        std::cout << "Usage: " << argv[0] << " <db> <array output> "
+            "<trie tree output>\n";
+        return -1;
+    }
+
+    const auto words_db = argv[1];
+    const auto array_filename = argv[2];
+    const auto tree_filename = argv[3];
+    return generate(words_db, array_filename, tree_filename);
 }

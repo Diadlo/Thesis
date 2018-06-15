@@ -1,18 +1,17 @@
 project(Thesis)
 cmake_minimum_required(VERSION 3.10)
 
-set(PROJECT_NAME thesis)
 set(CMAKE_CXX_STANDARD 14)
 
 add_library(sqlite_db STATIC include/sqlite_db.h src/sqlite_db.cpp)
 target_include_directories(sqlite_db PUBLIC include)
 target_link_libraries(sqlite_db sqlite3)
 
-add_executable(${PROJECT_NAME}
-        src/main.cpp
+add_executable(code_generator
+        src/code_generator.cpp
         src/trietree.h)
 
-target_link_libraries(${PROJECT_NAME} sqlite_db)
+target_link_libraries(code_generator sqlite_db)
 
 add_executable(filler src/filler.cpp)
 target_link_libraries(filler sqlite_db)
@@ -36,13 +35,13 @@ add_custom_command(
             words_array.h words_trie_tree.h
         COMMAND
             cmake -E echo "Generating headers" &&
-            ./${PROJECT_NAME} ${DB_FILE} words_array.h words_trie_tree.h
+            ./code_generator ${DB_FILE} words_array.h words_trie_tree.h
         DEPENDS
             ${DB_FILE}
         WORKING_DIRECTORY
             ${CMAKE_BINARY_DIR}
         DEPENDS
-            ${PROJECT_NAME})
+            code_generator)
 
 # Tests
 function (add_test name)

@@ -48,7 +48,7 @@ public:
             const std::vector<std::string>& columns,
             It begin, It end)
     {
-        constexpr auto WORDS_PER_INSERT = 2000;
+        constexpr auto WORDS_PER_INSERT = 500;
         const auto count = end - begin;
         auto it = begin;
         for (int i = 0; i < count / WORDS_PER_INSERT; i++) {
@@ -76,7 +76,7 @@ private:
     bool insert_rows_range(const std::string& table_name,
             const std::vector<std::string>& columns, It begin, It end)
     {
-        auto ss = std::stringstream{};
+        std::ostringstream ss;
         ss << "INSERT OR IGNORE INTO " << table_name << "(";
         std::copy(columns.begin(), columns.end(),
             std::ostream_iterator<std::string>(ss, ","));

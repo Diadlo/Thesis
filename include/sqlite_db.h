@@ -38,6 +38,7 @@ public:
     bool create_table(const std::string& name, const std::vector<table_column>& columns);
     std::vector<std::string> select_sorted_column(const std::string& table,
         table_column::data_type type, const std::string& column);
+    bool contains(const std::string& table, const std::string& column, const std::string& value);
 
     std::string error() const;
     bool operator!() const;

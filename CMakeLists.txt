@@ -47,10 +47,10 @@ add_custom_command(
 function (add_test name)
     set(sources ${ARGN})
     add_executable(${name} ${sources} test/${name}.cpp)
-    target_link_libraries(${name} sqlite3)
     target_include_directories(${name} PUBLIC ${CMAKE_BINARY_DIR})
 endfunction()
 
 add_test(sql_searcher words_array.h words_trie_tree.h)
+target_link_libraries(sql_searcher sqlite_db)
 add_test(binary_searcher words_array.h)
 add_test(trie_searcher   words_trie_tree.h)

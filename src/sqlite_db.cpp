@@ -123,3 +123,25 @@ std::vector<std::string> sqlite_db::select_sorted_column(
     return words;
 }
 
+bool sqlite_db::contains(
+        const std::string& table,
+        const std::string& column,
+        const std::string& value)
+{
+    std::ostringstream ss;
+    ss << "SELECT " << column << " FROM " << table << " WHERE " << column
+       << " = ?;";
+    const auto query = ss.str();
+    sqlite3_stmt* res;
+    auto rc = sqlite3_prepare_v2(m_db, query.c_str(), -1, &res, 0);
+    if (rc != SQLITE_OK) {
+        return {};
+    }
+
+    sqlite3_bind_text(res, 1, value.c_str(), value.size(), nullptr);
+
+    rc = sqlite3_step(res);
+    const auto find = rc == SQLITE_ROW;
+    sqlite3_finalize(res);
+    return find;
+}

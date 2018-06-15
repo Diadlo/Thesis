@@ -101,16 +101,8 @@ private:
     int m_size;
 };
 
-int main(int argc, const char* argv[])
+int fill(int count, const std::string& words_db)
 {
-    std::srand(unsigned(std::time(0)));
-    if (argc != 3) {
-        std::cout << "Usage: " << argv[0] << " <count> <db>\n";
-        return -1;
-    }
-
-    auto count = atoi(argv[1]);
-    auto words_db = argv[2];
     auto db = sqlite_db{words_db};
     if (!db) {
         std::cerr << "Error opening database: " << db.error();
@@ -135,4 +127,17 @@ int main(int argc, const char* argv[])
     }
 
     return 0;
+}
+
+int main(int argc, const char* argv[])
+{
+    std::srand(unsigned(std::time(0)));
+    if (argc != 3) {
+        std::cout << "Usage: " << argv[0] << " <count> <db>\n";
+        return -1;
+    }
+
+    auto count = atoi(argv[1]);
+    auto words_db = argv[2];
+    return fill(count, words_db);
 }

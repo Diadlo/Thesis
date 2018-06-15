@@ -30,17 +30,16 @@ void write_def_array(const std::string& filename, const std::vector<std::string>
 void write_trie_array(const std::string& filename, const std::vector<std::string>& words)
 {
     std::ofstream out(filename);
-    TrieTree t;
+    trie_tree t;
     for (const auto& word : words) {
         t.insert(word);
     }
 
-    auto nodes = t.getNodes();
+    auto nodes = t.get_nodes();
     out << "#pragma once\n"
         << "struct TrieNode { \n"
         << "    char letter;\n"
         << "    bool isLeaf;\n"
-//        << "    int id;\n"
         << "    int nextId;\n"
         << "    int bottomId;\n"
         << "};\n"
@@ -48,7 +47,7 @@ void write_trie_array(const std::string& filename, const std::vector<std::string
         << "#define TRIE_TREE_INITIALIZER { \\\n";
     for (auto node : nodes) {
         const auto letter = node->letter;
-        const auto sLetter = [letter]() {
+        const auto s_letter = [letter]() {
             switch (letter)
             {
                 case '\0':
@@ -61,11 +60,10 @@ void write_trie_array(const std::string& filename, const std::vector<std::string
         }();
 
         out << "TrieNode{"
-            << "'" << sLetter << "', "
-            << (node->isLeaf ? "true" : "false") << ", "
-//            << node->id << ", "
-            << node->nextId << ", "
-            << node->bottomId
+            << "'" << s_letter << "', "
+            << (node->is_leaf ? "true" : "false") << ", "
+            << node->next_id << ", "
+            << node->bottom_id
             << "},\\\n";
     }
     out << "}\n";

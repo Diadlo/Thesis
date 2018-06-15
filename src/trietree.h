@@ -6,17 +6,17 @@
 #include <vector>
 #include <algorithm>
 
-class TrieNode
+class trie_node
 {
 public:
-    TrieNode(char letter)
-        : isLeaf{false}
+    trie_node(char letter)
+        : is_leaf{false}
         , letter{letter}
     {
-        globalCount++;
+        global_count++;
     }
 
-    ~TrieNode()
+    ~trie_node()
     {
         for (auto node : children) {
             delete node;
@@ -26,70 +26,70 @@ public:
     void insert(const char* str)
     {
         char c = *str;
-        auto nodeIt = std::find_if(children.begin(), children.end(), 
-                [c](TrieNode* node) { return node->letter == c; });
+        auto nodeIt = std::find_if(children.begin(), children.end(),
+                [c](trie_node* node) { return node->letter == c; });
 
-        TrieNode* node = nullptr;
+        trie_node* node = nullptr;
         if (nodeIt != children.end()) {
             node = *nodeIt;
         } else {
-            node = new TrieNode(c);
+            node = new trie_node(c);
             children.push_back(node);
         }
 
         auto nextStr = str + 1;
         if (*nextStr == '\0') {
-            node->isLeaf = true;
+            node->is_leaf = true;
         } else {
             node->insert(nextStr);
         }
     }
 
-    void getNodes(std::vector<TrieNode*>& nodes, int& id) const
+    void get_nodes(std::vector<trie_node*>& nodes, int& id) const
     {
         this->id = id++;
-        TrieNode* prev = nullptr;
+        trie_node* prev = nullptr;
 
         for (auto it = children.begin(); it != children.end(); ++it) {
             auto node = *it;
             nodes.push_back(node);
-            node->getNodes(nodes, id);
+            node->get_nodes(nodes, id);
             if (prev != nullptr) {
-                prev->nextId = node->id;
+                prev->next_id = node->id;
             }
 
             prev = node;
         }
 
         if (prev != nullptr) {
-            prev->nextId = 0;
+            prev->next_id = 0;
         }
 
         auto bottom = children.front();
-        this->bottomId = bottom != nullptr ? bottom->id : 0;
+        this->bottom_id = bottom != nullptr ? bottom->id : 0;
     }
 
 public:
-    static int globalCount;
+    static int global_count;
     mutable int id;
-    mutable int nextId;
-    mutable int bottomId;
-    bool isLeaf;
+    mutable int next_id;
+    mutable int bottom_id;
+    bool is_leaf;
     char letter;
-    std::list<TrieNode*> children;
+    std::list<trie_node*> children;
 };
 
-int TrieNode::globalCount = 0;
+int trie_node::global_count = 0;
 
-class TrieTree
+class trie_tree
 {
 public:
-    TrieTree()
-        : root{new TrieNode('\0')}
+    trie_tree()
+        : root{new trie_node('\0')}
     {
     }
 
-    ~TrieTree()
+    ~trie_tree()
     {
         delete root;
     }
@@ -99,18 +99,18 @@ public:
         root->insert(s.c_str());
     }
 
-    std::vector<TrieNode*> getNodes() const
+    std::vector<trie_node*> get_nodes() const
     {
         int startId = 0;
-        auto nodes = std::vector<TrieNode*>{};
-        nodes.reserve(TrieNode::globalCount);
+        auto nodes = std::vector<trie_node*>{};
+        nodes.reserve(trie_node::global_count);
         nodes.push_back(root);
-        root->getNodes(nodes, startId);
+        root->get_nodes(nodes, startId);
         return nodes;
     }
 
 private:
-    TrieNode* root;
+    trie_node* root;
 };
 
 #endif // _TRIE_TREE_H_
